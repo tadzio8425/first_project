@@ -1,0 +1,10 @@
+<launch>
+
+    <!-- Global parameters -->
+    <param name="rw_baseline" value="1.30"/>
+    <param name="fr_distance" value="1.765"/>
+    <param name="steering_factor" value="32"/>
+
+    <!-- First odometry node -->
+    <node pkg="first_project" type="odometry" name="odometry" output="screen" />
+</launch>
