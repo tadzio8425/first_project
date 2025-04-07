@@ -18,7 +18,7 @@ double w; //Angular velocity of the vehicle
 
 double x = 0; // Initial x-position
 double y = 0; // Initial y-position
-double theta = M_PI/2; // Initial angle
+double theta = M_PI; // Initial angle
 
 double vx;
 double vy;
@@ -39,8 +39,8 @@ void computeOdometry() {
     w = (((V * 1000) / 3600) * tan((steering_angle / steering_factor) * (M_PI / 180))) / fr_distance;
 
     // B. We integrate to estimate the angle of rotation and then the position
-    vx = V * cos(theta);
-    vy = V * sin(theta);
+    vx = ((V * 1000) / 3600)   * cos(theta);
+    vy = ((V * 1000) / 3600)  * sin(theta);
     
     // Update orientation and position
     theta += w * dt;
