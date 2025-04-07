@@ -55,7 +55,7 @@ void publishOdom(){
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta);
     geometry_msgs::TransformStamped odom_trans;
     odom_trans.header.stamp = current_time;
-    odom_trans.header.frame_id = "odom";
+    odom_trans.header.frame_id = "odom-vehicle";
     odom_trans.child_frame_id = "base_link"; 
     odom_trans.transform.translation.x = x;
     odom_trans.transform.translation.y = y;
