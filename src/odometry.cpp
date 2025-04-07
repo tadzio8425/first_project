@@ -8,17 +8,17 @@
 
 //Variables
 double steering_angle = 0;
-double speed_front = 0;
+double V = 0;
 
 double dt;
 double fr_distance; //Distance between front and rear wheels 
+double steering_factor;
 double R; //Distance to the CIR
-double V; //Linear speed of the vehicle
 double w; //Angular velocity of the vehicle
 
 double x = 0; // Initial x-position
 double y = 0; // Initial y-position
-double theta = 0; // Initial angle
+double theta = M_PI/2; // Initial angle
 
 double vx;
 double vy;
@@ -32,40 +32,24 @@ tf::TransformBroadcaster *odom_broadcaster;
 
 // Methods
 
-void computeOdometry(){
-
-    //A. We obtain the linear speed of the vehicle (V)
+void computeOdometry() {
+    // A. We obtain the linear speed of the vehicle (V)
     dt = (current_time - last_time).toSec();
 
+    w = (((V * 1000) / 3600) * tan((steering_angle / steering_factor) * (M_PI / 180))) / fr_distance;
 
-    // Check if the steering angle is valid (not too small or zero)
-    if (steering_angle == 0) {
-        // If the steering angle is zero, we are driving straight, set radius to a large value
-        R = std::numeric_limits<double>::infinity();
-    } else {
-        // A1. Radius of Curvature (R) for Ackermann steering
-        R = fr_distance / tan(steering_angle * (M_PI / 180));  // fr_distance is the wheelbase length (L)
-    }
-    
-    // Ensure radius is not zero or infinite (check for invalid situations)
-    if (R == 0 || std::isinf(R)) {
-        ROS_WARN("Invalid radius, steering angle too small or zero. Skipping update.");
-        return;  // Skip update to prevent NaN propagation
-    }
-
-    w = (((speed_front * 1000)/3600)*sin((steering_angle)*(M_PI/180)))/fr_distance;
-
-    V = w*R;
-
-    //B. We integrate to estimate the angle of roation and then the position
+    // B. We integrate to estimate the angle of rotation and then the position
     vx = V * cos(theta);
     vy = V * sin(theta);
     
+    // Update orientation and position
     theta += w * dt;
+    if (theta > M_PI) theta -= 2 * M_PI;   // Keep theta in the range [-π, π]
+    if (theta < -M_PI) theta += 2 * M_PI;
+    
     x += vx * dt;
     y += vy * dt;
 }
-
 
 void publishOdom(){
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta);
@@ -103,7 +87,8 @@ void publishOdom(){
 
 void subscriptionCallback(const geometry_msgs::PointStamped msg){
     steering_angle = msg.point.x;
-    speed_front = msg.point.y;
+    V = msg.point.y;
+    current_time = msg.header.stamp;
   }
 
 
@@ -119,15 +104,15 @@ int main(int argc, char **argv){
     last_time = ros::Time::now();
 
     n.getParam("/fr_distance", fr_distance);
+    n.getParam("/steering_factor", steering_factor);
 
     /* 2. Internal subscriber configuration */
     ros::Subscriber sub = n.subscribe("speedsteer", 100, subscriptionCallback);
     ros::spinOnce();
 
-    ros::Rate r(1.0);
+    ros::Rate r(10000);
     while(n.ok()){
         ros::spinOnce(); //We obtain the raw information by listening to speedsteer
-        current_time = ros::Time::now();
 
         /* 3. We compute the odometry */
         computeOdometry();
@@ -138,6 +123,6 @@ int main(int argc, char **argv){
         ROS_INFO("I heard: [%f, %f, %f]", x, y, theta);
 
         last_time = current_time;
-        //r.sleep();
+        r.sleep();
     }
 }
