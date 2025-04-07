@@ -18,7 +18,7 @@ double w; //Angular velocity of the vehicle
 
 double x = 0; // Initial x-position
 double y = 0; // Initial y-position
-double theta = M_PI; // Initial angle
+double theta = 0; // Initial angle
 
 double vx;
 double vy;
