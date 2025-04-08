@@ -29,7 +29,6 @@ ros::Time last_time;
 nav_msgs::Odometry odom;
 ros::Publisher odom_pub;
 tf::TransformBroadcaster *odom_broadcaster;
-Hola
 // Methods
 
 void computeOdometry() {
