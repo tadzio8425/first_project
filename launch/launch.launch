@@ -4,6 +4,9 @@
     <param name="rw_baseline" value="1.30"/>
     <param name="fr_distance" value="1.765"/>
     <param name="steering_factor" value="32"/>
+    <param name="lat_r" value="45.618932386592405" />
+    <param name="lon_r" value="9.281178887031235" />
+    <param name="alt_r" value="229.04906147731415" />
 
     <!-- First odometry node -->
     <node pkg="first_project" type="odometry" name="odometry" output="screen" />
