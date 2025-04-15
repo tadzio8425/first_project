@@ -11,3 +11,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(odometry src/odometry.cpp)
 target_link_libraries(odometry ${catkin_LIBRARIES})
+
+## Build gps odometry node
+add_executable(gps_odometer src/gps_odometer.cpp)
+target_link_libraries(gps_odometer ${catkin_LIBRARIES})
