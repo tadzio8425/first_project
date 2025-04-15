@@ -64,7 +64,7 @@ void publish_gps_Odom() {
     // Publish gps_odometry
     gps_odom.header.stamp = current_time;
     gps_odom.header.frame_id = "odom_gps";
-    gps_odom.child_frame_id = "gps";
+    gps_odom.child_frame_id = "base_link";
 
     gps_odom.pose.pose.position.x = x;
     gps_odom.pose.pose.position.y = y;
@@ -81,7 +81,7 @@ void publish_gps_Odom() {
     geometry_msgs::TransformStamped gps_odom_tf;
     gps_odom_tf.header.stamp = current_time;
     gps_odom_tf.header.frame_id = "odom-gps";
-    gps_odom_tf.child_frame_id = "gps";
+    gps_odom_tf.child_frame_id = "base_link";
 
     gps_odom_tf.transform.translation.x = x;
     gps_odom_tf.transform.translation.y = y;

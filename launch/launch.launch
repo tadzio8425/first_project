@@ -10,4 +10,6 @@
 
     <!-- First odometry node -->
     <node pkg="first_project" type="odometry" name="odometry" output="screen" />
+    <!-- Second odometry node -->
+    <node pkg="first_project" type="odometry" name="gps_odometer" output="screen" />
 </launch>
