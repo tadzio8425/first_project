@@ -2,8 +2,8 @@
 #include "std_msgs/String.h"
 #include <math.h>
 #include <tf/transform_broadcaster.h>
-#include <sensor_msgs/Odometry.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <nav_msgs/Odometry.h>
 
 
 const double a = 6378137.0;           
@@ -90,12 +90,12 @@ void publish_gps_Odom() {
     gps_odom_tf.transform.rotation.x = 0.0;
     gps_odom_tf.transform.rotation.y = 0.0;
     gps_odom_tf.transform.rotation.z = 0.0;
-    gps_odom_tf_tf.transform.rotation.w = 1.0;
+    gps_odom_tf.transform.rotation.w = 1.0;
     // send transform
     gps_odom_broadcaster->sendTransform(gps_odom_tf);
 }
 
-void subscriptionCallback(const sensor_msgs::NavSatFix msg){
+void subscriptionCallback(const sensor_msgs::NavSatFix::ConstPtr& msg){
     lat = msg->latitude;
     lon = msg->longitude;
     alt = msg->altitude;
@@ -107,7 +107,7 @@ int main(int argc, char **argv){
     /* 1. GPS Odometry node initialization */
     ros::init(argc, argv, "gps_odometer");
     ros::NodeHandle n;
-    ros::Publisher gps_odom_pub = n.advertise<nav_msgs::Odometry>("gps_odom", 50);
+    gps_odom_pub = n.advertise<nav_msgs::Odometry>("gps_odom", 50);
     tf::TransformBroadcaster _gps_odom_broadcaster;
     gps_odom_broadcaster = &_gps_odom_broadcaster;
    
