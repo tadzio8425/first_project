@@ -18,7 +18,7 @@ double w; //Angular velocity of the vehicle
 
 double x = 0; // Initial x-position
 double y = 0; // Initial y-position
-double theta = 0; // Initial angle
+double theta = M_PI/2; // Initial angle
 
 double vx;
 double vy;
@@ -54,8 +54,8 @@ void publishOdom(){
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta);
     geometry_msgs::TransformStamped odom_trans;
     odom_trans.header.stamp = current_time;
-    odom_trans.header.frame_id = "odom-vehicle";
-    odom_trans.child_frame_id = "base_link"; 
+    odom_trans.header.frame_id = "odom";
+    odom_trans.child_frame_id = "vehicle"; 
     odom_trans.transform.translation.x = x;
     odom_trans.transform.translation.y = y;
     odom_trans.transform.translation.z = 0.0;
@@ -75,7 +75,7 @@ void publishOdom(){
     odom.pose.pose.orientation = odom_quat;
     
     //Set the velocity
-    odom.child_frame_id = "base_link";
+    odom.child_frame_id = "vehicle";
     odom.twist.twist.linear.x = vx;
     odom.twist.twist.linear.y = vy;
     odom.twist.twist.angular.z = w;
@@ -118,7 +118,7 @@ int main(int argc, char **argv){
         /* 4. We publish the odometry and tf */
         publishOdom();
 
-        ROS_INFO("I heard: [%f, %f, %f]", x, y, theta);
+        //ROS_INFO("I heard: [%f, %f, %f]", x, y, theta);
 
         last_time = current_time;
         r.sleep();

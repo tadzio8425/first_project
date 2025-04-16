@@ -14,7 +14,9 @@ const double e2 = 1 - (pow(b, 2) / pow(a, 2));
 double x_ECEF, y_ECEF, z_ECEF;
 double x, y, z, N;
 ros::Time current_time, last_time;
-double lat_ref, lon_ref, alt_ref;
+double lat_ref = 45.618932;
+double lon_ref = 9.281179;
+double alt_ref = 229.049061;
 double lat, lon, alt;
 
 nav_msgs::Odometry gps_odom;
@@ -61,10 +63,28 @@ void gps_to_odom(double lat_ref, double lon_ref, double alt_ref){
 
 
 void publish_gps_Odom() {
+
+    geometry_msgs::TransformStamped gps_odom_tf;
+    gps_odom_tf.header.stamp = current_time;
+    gps_odom_tf.header.frame_id = "odom";
+    gps_odom_tf.child_frame_id = "gps";
+
+    gps_odom_tf.transform.translation.x = x;
+    gps_odom_tf.transform.translation.y = y;
+    gps_odom_tf.transform.translation.z = z;
+
+    gps_odom_tf.transform.rotation.x = 0.0;
+    gps_odom_tf.transform.rotation.y = 0.0;
+    gps_odom_tf.transform.rotation.z = 0.0;
+    gps_odom_tf.transform.rotation.w = 1.0;
+    // send transform
+    gps_odom_broadcaster->sendTransform(gps_odom_tf);
+
+
     // Publish gps_odometry
     gps_odom.header.stamp = current_time;
-    gps_odom.header.frame_id = "odom_gps";
-    gps_odom.child_frame_id = "base_link";
+    gps_odom.header.frame_id = "odom";
+    gps_odom.child_frame_id = "gps";
 
     gps_odom.pose.pose.position.x = x;
     gps_odom.pose.pose.position.y = y;
@@ -78,21 +98,7 @@ void publish_gps_Odom() {
     gps_odom_pub.publish(gps_odom);
 
     
-    geometry_msgs::TransformStamped gps_odom_tf;
-    gps_odom_tf.header.stamp = current_time;
-    gps_odom_tf.header.frame_id = "odom-gps";
-    gps_odom_tf.child_frame_id = "base_link";
 
-    gps_odom_tf.transform.translation.x = x;
-    gps_odom_tf.transform.translation.y = y;
-    gps_odom_tf.transform.translation.z = z;
-
-    gps_odom_tf.transform.rotation.x = 0.0;
-    gps_odom_tf.transform.rotation.y = 0.0;
-    gps_odom_tf.transform.rotation.z = 0.0;
-    gps_odom_tf.transform.rotation.w = 1.0;
-    // send transform
-    gps_odom_broadcaster->sendTransform(gps_odom_tf);
 }
 
 void subscriptionCallback(const sensor_msgs::NavSatFix::ConstPtr& msg){
