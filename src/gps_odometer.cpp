@@ -182,7 +182,7 @@ int main(int argc, char **argv){
     /* 2. Internal subscriber configuration */
     ros::Subscriber sub = n.subscribe("swiftnav/front/gps_pose", 100, subscriptionCallback);
 
-    ros::Rate r(10000);
+    ros::Rate r(10);
     while(n.ok()){
         ros::spinOnce(); //We obtain the raw information by listening to speedsteer
 
