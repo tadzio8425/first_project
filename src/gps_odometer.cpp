@@ -5,10 +5,14 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <nav_msgs/Odometry.h>
 
-
 const double a = 6378137.0;           
 const double b = 6356752.0;
 const double e2 = 1 - (pow(b, 2) / pow(a, 2));
+
+struct Point {
+    double x, y;
+};
+
 
 //variables
 double x_ECEF, y_ECEF, z_ECEF;
@@ -17,12 +21,52 @@ ros::Time current_time, last_time;
 double lat_ref = 45.618932;
 double lon_ref = 9.281179;
 double alt_ref = 229.049061;
+double theta;
 double lat, lon, alt;
 
 nav_msgs::Odometry gps_odom;
 ros::Publisher gps_odom_pub;
 tf::TransformBroadcaster *gps_odom_broadcaster;
 
+
+// Heading window - Config
+const size_t window_size = 20;
+std::deque<Point> window;
+Point p;
+
+
+
+
+// Function to compute smoothed heading using a moving average window
+double computeSmoothedHeading(const std::deque<Point>& positions) {
+    static double last_valid_heading = 0.0; // memory for fallback
+    if (positions.size() < 2) return last_valid_heading;
+
+    double sum_dx = 0.0;
+    double sum_dy = 0.0;
+    const double movement_threshold = 0.01;
+    bool valid_movement_found = false;
+
+    for (size_t i = 1; i < positions.size(); ++i) {
+        double dx = positions[i].x - positions[i - 1].x;
+        double dy = positions[i].y - positions[i - 1].y;
+        double dist = std::hypot(dx, dy);
+
+        if (dist < movement_threshold) continue; // skip noisy steps
+
+        sum_dx += dx;
+        sum_dy += dy;
+        valid_movement_found = true;
+    }
+
+    if (!valid_movement_found) {
+        return last_valid_heading; // return last known heading if nothing valid
+    }
+
+    double heading = std::atan2(sum_dy, sum_dx);
+    last_valid_heading = heading; // update fallback
+    return heading;
+}
 
 void gps_to_odom(double lat_ref, double lon_ref, double alt_ref){
 
@@ -59,24 +103,37 @@ void gps_to_odom(double lat_ref, double lon_ref, double alt_ref){
           + cos(lat0_rad) * sin(lon0_rad) * dy
           + sin(lat0_rad) * dz;
 
+
+    p.x = x;
+    p.y = y;
+
+    window.push_back(p);
+    if (window.size() > window_size) {
+        window.pop_front();
+    }
+
+    if (window.size() >= 2) {
+        theta = computeSmoothedHeading(window);
+    }
+    
+
 }
 
 
 void publish_gps_Odom() {
 
     geometry_msgs::TransformStamped gps_odom_tf;
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta);
     gps_odom_tf.header.stamp = current_time;
     gps_odom_tf.header.frame_id = "odom";
     gps_odom_tf.child_frame_id = "gps";
+    
 
     gps_odom_tf.transform.translation.x = x;
     gps_odom_tf.transform.translation.y = y;
     gps_odom_tf.transform.translation.z = z;
 
-    gps_odom_tf.transform.rotation.x = 0.0;
-    gps_odom_tf.transform.rotation.y = 0.0;
-    gps_odom_tf.transform.rotation.z = 0.0;
-    gps_odom_tf.transform.rotation.w = 1.0;
+    gps_odom_tf.transform.rotation = odom_quat;
     // send transform
     gps_odom_broadcaster->sendTransform(gps_odom_tf);
 
@@ -90,10 +147,8 @@ void publish_gps_Odom() {
     gps_odom.pose.pose.position.y = y;
     gps_odom.pose.pose.position.z = z;
 
-    gps_odom.pose.pose.orientation.x = 0.0; //still needing work, missing heading calculation
-    gps_odom.pose.pose.orientation.y = 0.0;
-    gps_odom.pose.pose.orientation.z = 0.0;
-    gps_odom.pose.pose.orientation.w = 1.0; 
+    gps_odom.pose.pose.orientation = odom_quat;
+    
 
     gps_odom_pub.publish(gps_odom);
 
@@ -136,8 +191,6 @@ int main(int argc, char **argv){
 
         /* 4. We publish the odometry and tf */
         publish_gps_Odom();
-
-        ROS_INFO("I heard: [%f, %f, %f]", x, y, z);
 
         last_time = current_time;
         r.sleep();
