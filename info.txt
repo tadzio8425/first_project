@@ -1,3 +1,3 @@
-11076020;Julian;Corrales
+11076020;JulianEsteban;CorralesGomez
 11067099;JuanSebastian;OrtegaRomero
 11046815;Luis;Guzman
