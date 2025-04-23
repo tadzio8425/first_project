@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp std_msgs tf message_generation)
 
 add_message_files(
  FILES
- secotor_times.msg
+ sector_times.msg
 
  )
 
