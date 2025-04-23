@@ -16,8 +16,14 @@
     <node pkg="first_project" type="odometry" name="odometry" output="screen" />
     <!-- Second odometry node -->
     <node pkg="first_project" type="gps_odometer" name="gps_odometer" output="screen" />
+    <!-- Third node -->
+    <node pkg="first_project" type="sector_times" name="sector_times" output="screen" />
 
     <!-- Rviz visualization node -->
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find first_project)/rviz/config_file.rviz" />
+
+    <!-- Topic echo-->
+    <arg name="sector_times"     default="sector_times"/>
+    <node pkg="rostopic" type="rostopic" name="topic_echo" args="echo $(arg sector_times)" output="screen"/>
 
 </launch>
