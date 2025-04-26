@@ -29,11 +29,8 @@ target_link_libraries(odometry ${catkin_LIBRARIES})
 add_executable(gps_odometer src/gps_odometer.cpp)
 target_link_libraries(gps_odometer ${catkin_LIBRARIES})
 
-
 ## Build sector node
 add_executable(sector_times src/sector_times.cpp)
 target_link_libraries(sector_times ${catkin_LIBRARIES})
+add_dependencies(sector_times first_project_generate_messages_cpp)
 
-## For the third node, should be included a dependencie for the use of a custom message that
-## should look like this:
-## add_dependencies(sector_times first_project_generate_messages_cpp)
