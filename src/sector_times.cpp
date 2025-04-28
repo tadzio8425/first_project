@@ -7,9 +7,8 @@
 #include <geometry_msgs/PointStamped.h>
 #include <nav_msgs/Odometry.h>
 
-#include <first_project/sector_times.h>  //Filter
+#include <first_project/sector_times.h>  //Filter message
 
-// Globals from your original code
 double lat, lon, alt;
 ros::Time current_time, last_time;
 double lat_ref, lon_ref, alt_ref;
